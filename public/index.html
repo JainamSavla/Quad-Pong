@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quad Pong Online</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            background-color: black;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Press Start 2P', monospace;
+        }
+        
+        .game-container {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            border: 2px solid white;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            pointer-events: none;
+        }
+        
+        .interactive {
+            pointer-events: auto;
+        }
+
+        .btn {
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+            font-family: 'Press Start 2P', monospace;
+            padding: 15px 20px;
+            margin: 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            background-color: white;
+            color: black;
+        }
+
+        input {
+            background-color: black;
+            color: white;
+            border: 2px solid white;
+            font-family: 'Press Start 2P', monospace;
+            padding: 15px;
+            font-size: 20px;
+            text-align: center;
+            width: 200px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #aaa;
+        }
+        
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            background-color: rgba(0,0,0,0.85);
+            height: 100%;
+            justify-content: center;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+        
+        .blink {
+            animation: blinker 1s linear infinite;
+        }
+        
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="600" height="600"></canvas>
+        <div id="ui-layer">
+            
+            <div id="screen-main" class="screen active">
+                <h1 style="font-size: 40px; margin-top: -60px; margin-bottom: 60px;">QUAD PONG</h1>
+                
+                <div style="margin-bottom: 40px;">
+                    <p style="font-size: 12px; margin-bottom: 10px;">Play Local:</p>
+                    <button class="btn interactive" onclick="startLocal(1)">2 Players</button>
+                    <button class="btn interactive" onclick="startLocal(2)">vs AI</button>
+                </div>
+                
+                <div>
+                    <p style="font-size: 12px; margin-bottom: 10px;">Play Online:</p>
+                    <button class="btn interactive" id="btn-create">Create Private Match</button>
+                    <button class="btn interactive" id="btn-join-screen">Join with Code</button>
+                </div>
+            </div>
+
+            <div id="screen-create" class="screen">
+                <h2 style="font-size: 24px; margin-bottom: 30px;">Room Created</h2>
+                <p style="font-size: 12px; line-height: 1.5; margin-bottom: 20px;">Share this code with your<br>friend to play!</p>
+                <div style="font-size: 40px; margin-bottom: 30px; letter-spacing: 5px;" id="room-code-display"></div>
+                <button class="btn interactive" id="btn-copy">Copy Code</button>
+                <div style="margin-top: 40px; font-size: 12px;" class="blink">Waiting for opponent_</div>
+            </div>
+
+            <div id="screen-join" class="screen">
+                <h2 style="font-size: 24px; margin-bottom: 40px;">Join Match</h2>
+                <p id="join-error" style="color: white; font-size: 10px; margin-bottom: 10px; display:none;">Invalid code. Try again.</p>
+                <input type="text" id="join-input" class="interactive" maxlength="6" placeholder="CODE">
+                <button class="btn interactive" id="btn-join">Join</button>
+                <button class="btn interactive" onclick="showScreen('main')" style="margin-top: 40px; font-size: 10px; border: none;">Back</button>
+            </div>
+            
+            <div id="screen-game-over" class="screen">
+                <h1 style="font-size: 30px; margin-bottom: 30px;" id="game-over-text"></h1>
+                <p id="game-over-sub" style="font-size: 12px; margin-bottom: 40px;"></p>
+                <button class="btn interactive" id="btn-return" style="display:none;" onclick="showScreen('main'); resetLocal();">Return to Menu</button>
+            </div>
+
+        </div>
+    </div>
+    
+    <script src="/game.js"></script>
+</body>
+</html>
